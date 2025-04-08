@@ -2,8 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { PageHeader } from "@/components/page-header";
-import { ref, onValue, set } from "firebase/database";
-import { realTimeDb } from "@/lib/firebase";
+import { fireStore } from "@/lib/firebase";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Select,
@@ -17,56 +16,60 @@ import {
 import DatePicker from "@/components/date-picker"
 import CustomNumberInput from "@/components/custon-number-input"
 import { Button } from "@/components/ui/button";
+import { getVentas } from "@/services/ventas-service";
+import { get } from "http";
+
+type ColmadoKey = "o7" | "o9" | "parqueo";
 
 export default function Home() {
-  const [colmado, setColmado] = useState("O7");
+  const [colmado, setColmado] = useState<ColmadoKey>("o7");
   const [ventas, setVentas] = useState<{ id: string; [key: string]: any }[]>([]);
-  const strRefColmado = `ventas${colmado}`;
-  const [ventaEntry, setVentaEntry] = useState({
+  const [isLoading, setIsLoading] = useState(false);
+  const [newVenta, setNewVenta] = useState({
     fecha: new Date(),
     monto: 0,
   });
   
   useEffect(() => {
-    const refColmado = ref(realTimeDb, strRefColmado);
-    const unsubscribe = onValue(refColmado, (snapshot) => {
-    const data = snapshot.val(); 
-    const ventasArray = Object.entries(data)
-      .map(([key, value]) => ({
-        id: key,
-        ...(typeof value === "object" && value !== null ? value : {}),
-      }))
-      .filter(venta => {
-        const pattern = /^[0-9]{4}/
-        return pattern.test(venta.id);
-      })
-
-      const mostRecetn = ventasArray.reduce((latest, current) => {
-        return new Date(current.id) > new Date(latest.id) ? current : latest;
-      }, {id: "0"});
-
-      setVentas(ventasArray);
-      setVentaEntry((pv) => ({...pv, fecha: new Date(mostRecetn.id) || new Date()}));
-    });
-
-    return () => unsubscribe();
-  }, [strRefColmado]);
-
-  console.log("Most Recent", ventaEntry.fecha);
-
+    if (colmado) {
+      loadVentas();
+    }
+  }, [colmado]);
+  
+  const loadVentas = async () => {
+    setIsLoading(true);
+    try {
+      const ventasData = await getVentas(colmado, 31);
+      setVentas(ventasData.map((venta) => ({ ...venta, id: venta.id || "" })));
+  
+      if (ventasData.length > 0) {
+        const mostRecent = ventasData[0];
+        const nextDate = new Date(mostRecent.date);
+        nextDate.setDate(nextDate.getDate() + 1);
+        setNewVenta((pv) => ({ ...pv, fecha: nextDate }));
+      }
+  
+      console.log("Ventas: ", ventasData);
+    } catch (error) {
+      console.error("Error loading ventas: ", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   return (
     <>
       <PageHeader>
         <div className="flex w-full items-center justify-between">
-          <h1 className="text-2xl font-bold">Registrar ventas</h1>
-          <div className="hidden">
-            <SelectColmado selected={colmado} setSelected={(value) => setColmado(value)} />
+          <h2 className="text-xl">Registrar ventas</h2>
+          <div className="hidden md:block">
+            <SelectColmado selected={colmado} setSelected={(value: ColmadoKey) => setColmado(value)} />
           </div>
         </div>
       </PageHeader>
       <section className="p-3">
-        <div className="block w-full mb-2">
-            <SelectColmado selected={colmado} setSelected={(value) => setColmado(value)} />
+        <div className="block w-full mb-2 md:hidden">
+            <SelectColmado selected={colmado} setSelected={(value: ColmadoKey) => setColmado(value)} />
         </div>
         <Card>
           <CardHeader>
@@ -76,10 +79,10 @@ export default function Home() {
           <CardContent>
             <form className="flex flex-col gap-2">
                 <DatePicker 
-                  value={ventaEntry.fecha} 
-                  onChange={(value) => setVentaEntry((pv) => ({...pv, fecha: value || new Date()}))}
+                  value={newVenta.fecha} 
+                  onChange={(value) => setNewVenta((pv) => ({...pv, fecha: value || new Date()}))}
                 />
-                <CustomNumberInput id="venta" value={ventaEntry.monto}/>
+                <CustomNumberInput id="venta" value={newVenta.monto}/>
                 <Button className="w-full">Agregar</Button>
             </form>
           </CardContent>
@@ -91,8 +94,8 @@ export default function Home() {
 }
 
 type SelectColmadoProps = {
-  selected: string;
-  setSelected: (value: string) => void;
+  selected: ColmadoKey;
+  setSelected: (value: ColmadoKey) => void;
 }
 
 export function SelectColmado({selected, setSelected}: SelectColmadoProps) {
@@ -104,9 +107,9 @@ export function SelectColmado({selected, setSelected}: SelectColmadoProps) {
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Colmados</SelectLabel>
-          <SelectItem value="O7">Colmado O7</SelectItem>
-          <SelectItem value="O9">Colmado O9</SelectItem>
-          <SelectItem value="ParqueO10">ParqueO 10</SelectItem>
+          <SelectItem value="o7">Colmado O7</SelectItem>
+          <SelectItem value="o9">Colmado O9</SelectItem>
+          <SelectItem value="parqueo">ParqueO 10</SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>
