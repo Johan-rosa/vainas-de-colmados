@@ -22,40 +22,36 @@ export default function Home() {
   const [colmado, setColmado] = useState("O7");
   const [ventas, setVentas] = useState<{ id: string; [key: string]: any }[]>([]);
   const strRefColmado = `ventas${colmado}`;
+  const [ventaEntry, setVentaEntry] = useState({
+    fecha: new Date(),
+    monto: 0,
+  });
   
   useEffect(() => {
     const refColmado = ref(realTimeDb, strRefColmado);
     const unsubscribe = onValue(refColmado, (snapshot) => {
-      const data = snapshot.val();
-      const ventasArray = Object.entries(data).map(([key, value]) => ({
+    const data = snapshot.val(); 
+    const ventasArray = Object.entries(data)
+      .map(([key, value]) => ({
         id: key,
         ...(typeof value === "object" && value !== null ? value : {}),
-      }));
+      }))
+      .filter(venta => {
+        const pattern = /^[0-9]{4}/
+        return pattern.test(venta.id);
+      })
+
+      const mostRecetn = ventasArray.reduce((latest, current) => {
+        return new Date(current.id) > new Date(latest.id) ? current : latest;
+      }, {id: "0"});
 
       setVentas(ventasArray);
+      setVentaEntry((pv) => ({...pv, fecha: new Date(mostRecetn.id) || new Date()}));
     });
 
     return () => unsubscribe();
   }, [strRefColmado]);
 
-  const mostRecent = ventas.reduce((latest, current) => {
-    const pattern = /^[0-9]{4}/
-    if (!pattern.test(current.id)) {
-      console.log(latest)
-      return latest;
-    }
-    return new Date(current.id) > new Date(latest.id) ? current : latest;
-  }, {id: "0"});
-
-  
-  
-  const [ventaEntry, setVentaEntry] = useState({
-    fecha: new Date(mostRecent.id),
-    monto: 0,
-  });
-  
-  console.log("Most Recent", mostRecent.id);
-  console.log("Most Recent", new Date(mostRecent.id));
   console.log("Most Recent", ventaEntry.fecha);
 
   return (
