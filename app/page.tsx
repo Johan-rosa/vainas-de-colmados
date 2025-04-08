@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
 
 export default function Home() {
   const [count, setCount] = useState(0);
 
   return (
-    <div className="p-4">
-      <h1>Hello App</h1>
-      <Button onClick={() => setCount(count + 1)}>{`Clics (${count})`}</Button>
-    </div>
+    <main>
+      <PageHeader>
+        <h2 className="font-semibold text-xl">Situación General</h2>
+      </PageHeader>
+    </main>
   );
 }
