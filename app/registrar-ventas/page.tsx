@@ -18,6 +18,9 @@ import CustomNumberInput from "@/components/custon-number-input"
 import { Button } from "@/components/ui/button";
 import { getVentas } from "@/services/ventas-service";
 import { get } from "http";
+import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from "@/components/ui/table";
+import { es } from 'date-fns/locale';
+import { format } from 'date-fns';
 
 type ColmadoKey = "o7" | "o9" | "parqueo";
 
@@ -57,6 +60,8 @@ export default function Home() {
     }
   };
   
+  const sortedVentas = ventas.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
   return (
     <>
       <PageHeader>
@@ -71,7 +76,7 @@ export default function Home() {
         <div className="block w-full mb-2 md:hidden">
             <SelectColmado selected={colmado} setSelected={(value: ColmadoKey) => setColmado(value)} />
         </div>
-        <Card>
+        <Card className="mb-2">
           <CardHeader>
             <CardTitle>Ventas del día</CardTitle>
             <CardDescription>Selecciona la fecha e introduce el monto</CardDescription>
@@ -85,6 +90,40 @@ export default function Home() {
                 <CustomNumberInput id="venta" value={newVenta.monto}/>
                 <Button className="w-full">Agregar</Button>
             </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Ventas</CardTitle>
+            <CardDescription>Ventas registradas</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <p>Cargando...</p>
+            ) : (
+              <div className="max-h-[500px] overflow-auto">
+
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">ID</TableHead>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead className="text-right">Monto (RD$)</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sortedVentas.map((venta, index) => (
+                      <TableRow key={venta.id}>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>{format(venta.date, 'PP', { locale: es })}</TableCell>
+                        <TableCell className="text-right">{venta.venta.toLocaleString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>)
+            }
           </CardContent>
         </Card>
 
