@@ -4,34 +4,28 @@ import { useState, useEffect, use } from "react";
 import { PageHeader } from "@/components/page-header";
 import { fireStore } from "@/lib/firebase";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import DatePicker from "@/components/date-picker"
 import CustomNumberInput from "@/components/custon-number-input"
 import { Button } from "@/components/ui/button";
 import { getVentas } from "@/services/ventas-service";
-import { get } from "http";
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from "@/components/ui/table";
 import { es } from 'date-fns/locale';
-import { format } from 'date-fns';
+import { formatUTC } from "@/utils";
+import { ColmadoKey } from "@/types";
+import SelectColmado from "@/components/select-colmado";
 
-type ColmadoKey = "o7" | "o9" | "parqueo";
 
 export default function Home() {
   const [colmado, setColmado] = useState<ColmadoKey>("o7");
   const [ventas, setVentas] = useState<{ id: string; [key: string]: any }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [range, setRange] = useState({ start: new Date(), end: new Date() });
   const [newVenta, setNewVenta] = useState({
     fecha: new Date(),
     monto: 0,
   });
+
+  const dateRange = range.end.getTime() - range.start.getTime();
   
   useEffect(() => {
     if (colmado) {
@@ -49,7 +43,12 @@ export default function Home() {
         const mostRecent = ventasData[0];
         const nextDate = new Date(mostRecent.date);
         nextDate.setDate(nextDate.getDate() + 1);
+        
+        const startDate = ventasData[ventasData.length - 1].date;
+        const endDate = mostRecent.date;
+
         setNewVenta((pv) => ({ ...pv, fecha: nextDate }));
+        setRange({ start: startDate, end: endDate }); 
       }
   
       console.log("Ventas: ", ventasData);
@@ -95,8 +94,13 @@ export default function Home() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Ventas</CardTitle>
-            <CardDescription>Ventas registradas</CardDescription>
+            <CardTitle>Ventas registradas</CardTitle>
+            <CardDescription className="mt-2 flex gap-2 items-center justify-between">
+              <span className="text-muted-foreground">Desde</span>
+              <DatePicker value={range.start}/>
+              <span className="text-muted-foreground">Hasta</span>
+              <DatePicker value={range.end}/>
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -108,6 +112,7 @@ export default function Home() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[100px]">ID</TableHead>
+                      <TableHead className="w-[100px]">Día</TableHead>
                       <TableHead>Fecha</TableHead>
                       <TableHead className="text-right">Monto (RD$)</TableHead>
                     </TableRow>
@@ -116,7 +121,8 @@ export default function Home() {
                     {sortedVentas.map((venta, index) => (
                       <TableRow key={venta.id}>
                         <TableCell>{index + 1}</TableCell>
-                        <TableCell>{format(venta.date, 'PP', { locale: es })}</TableCell>
+                        <TableCell>{formatUTC(new Date(venta.date), 'EEEE', { locale: es })}</TableCell>
+                        <TableCell>{formatUTC(venta.date, 'PP', { locale: es })}</TableCell>
                         <TableCell className="text-right">{venta.venta.toLocaleString()}</TableCell>
                       </TableRow>
                     ))}
@@ -130,27 +136,4 @@ export default function Home() {
       </section>
     </>
   );
-}
-
-type SelectColmadoProps = {
-  selected: ColmadoKey;
-  setSelected: (value: ColmadoKey) => void;
-}
-
-export function SelectColmado({selected, setSelected}: SelectColmadoProps) {
-  return (
-    <Select value={selected} onValueChange={setSelected}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select a fruit" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectLabel>Colmados</SelectLabel>
-          <SelectItem value="o7">Colmado O7</SelectItem>
-          <SelectItem value="o9">Colmado O9</SelectItem>
-          <SelectItem value="parqueo">ParqueO 10</SelectItem>
-        </SelectGroup>
-      </SelectContent>
-    </Select>
-  )
 }
