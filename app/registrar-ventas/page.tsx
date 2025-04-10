@@ -118,6 +118,12 @@ export default function registerVentas() {
     setNewVenta((pv) => ({ ...pv, date: value, fecha: dateAsKey(value) }))
   }
 
+  const handleRangeChange = (value: Date | undefined, key: "start" | "end") => {
+    if (value) {
+      setRange((pv) => ({ ...pv, [key]: value}));
+    }
+  };
+
   return (
     <>
       <PageHeader>
@@ -132,76 +138,87 @@ export default function registerVentas() {
         <div className="block w-full mb-2 md:hidden">
           <SelectColmado selected={colmado} setSelected={(value: ColmadoKey) => setColmado(value)} />
         </div>
-        <Card className="mb-2">
-          <CardHeader>
-            <CardTitle>Ventas del día</CardTitle>
-            <CardDescription>Selecciona la fecha e introduce el monto</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
-              <DatePicker
-                value={newVenta.date}
-                onChange={(value) => handleNewVentaDate(value || new Date())}
-              />
-              <CustomNumberInput 
-                id="venta" 
-                value={newVenta.venta}
-                onChange={(value) => setNewVenta((pv) => ({ ...pv, venta: Number(value)}))}
-              />
-              <Button className="w-full">Agregar</Button>
-            </form>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Ventas registradas</CardTitle>
-            <CardDescription className="mt-2 flex gap-2 items-center justify-between">
-              <span className="text-muted-foreground">Desde</span>
-              <DatePicker value={range.start} />
-              <span className="text-muted-foreground">Hasta</span>
-              <DatePicker value={range.end} />
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <p>Cargando...</p>
-            ) : (
-              <div className="max-h-[500px] overflow-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">ID</TableHead>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead className="text-right">Monto (RD$)</TableHead>
-                      <TableHead className="text-right">Total (RD$)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {
-                      ventas
+        <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-[1fr_2fr]">
+          <Card className="">
+            <CardHeader>
+              <CardTitle>Ventas del día</CardTitle>
+              <CardDescription>Selecciona la fecha e introduce el monto</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form className="flex flex-col gap-2 md:gap-3 lg:gap-5" onSubmit={handleSubmit}>
+                <DatePicker
+                  label = "Fecha"
+                  value={newVenta.date}
+                  onChange={(value) => handleNewVentaDate(value || new Date())}
+                  />
+                <CustomNumberInput 
+                  id="venta"
+                  label = "Monto"
+                  value={newVenta.venta}
+                  onChange={(value) => setNewVenta((pv) => ({ ...pv, venta: Number(value)}))}
+                />
+                <Button className="w-full">Agregar</Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Ventas registradas</CardTitle>
+              <CardDescription className="mt-2 flex gap-2 items-center justify-between">
+                <span className="text-muted-foreground">Desde</span>
+                <DatePicker 
+                  value={range.start} 
+                  onChange={(value) => handleRangeChange(value, 'start')}
+                  />
+                <span className="text-muted-foreground">Hasta</span>
+                <DatePicker 
+                  value={range.end} 
+                  onChange={(value) => handleRangeChange(value, 'end')}
+                  />
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <p>Cargando...</p>
+              ) : (
+                <div className="max-h-[500px] overflow-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[50px]">ID</TableHead>
+                        <TableHead>Fecha</TableHead>
+                        <TableHead className="text-right">Monto (RD$)</TableHead>
+                        <TableHead className="text-right">Total (RD$)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {
+                        ventas
                         .filter(venta => venta.date >= range.start && venta.date <= range.end)
                         .map((venta, index, filteredArray) => {
                           const ventaAcumulada = filteredArray
-                            .slice(0, index + 1)
-                            .reduce((sum, item) => sum + (item.venta || 0), 0);
-                            
+                          .slice(0, index + 1)
+                          .reduce((sum, item) => sum + (item.venta || 0), 0);
+                          
                           return (
                             <TableRow key={venta.id}>
-                              <TableCell>{index + 1}</TableCell>
-                              <TableCell>{format(venta.date, "PP", { locale: es })}</TableCell>
-                              <TableCell className="text-right">{venta.venta?.toLocaleString()}</TableCell>
-                              <TableCell className="text-right">{ventaAcumulada.toLocaleString()}</TableCell>
-                            </TableRow>
-                          );
-                        })
-                    }
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                                <TableCell>{index + 1}</TableCell>
+                                <TableCell>{format(venta.date, "PP", { locale: es })}</TableCell>
+                                <TableCell className="text-right">{venta.venta?.toLocaleString()}</TableCell>
+                                <TableCell className="text-right">{ventaAcumulada.toLocaleString()}</TableCell>
+                              </TableRow>
+                            );
+                          })
+                        }
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </section>
     </>
   )
