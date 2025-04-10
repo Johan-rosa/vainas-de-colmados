@@ -63,7 +63,9 @@ export default function Home() {
         nextDate.setDate(nextDate.getDate() + 1)
 
         const startDate = findMostRecentDateWithDay(mostRecent.date, newBalanceDay)
-        setRange({ start: startDate, end: mostRecent.date })
+        // TODO: fix this logic to never be a negative date
+        const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, startDate.getDate() - 1)
+        setRange({ start: startDate, end: endDate })
 
         setNewVenta((pv) => ({ ...pv, date: nextDate, fecha: dateAsKey(nextDate) }))
       }
@@ -101,8 +103,6 @@ export default function Home() {
   const handleNewVentaDate = (value: Date) => {
     setNewVenta((pv) => ({ ...pv, date: value, fecha: dateAsKey(value) }))
   }
-
-  const sortedVentas = ventas.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
   return (
     <>
@@ -165,7 +165,7 @@ export default function Home() {
                   </TableHeader>
                   <TableBody>
                     {
-                      sortedVentas
+                      ventas
                         .filter(venta => venta.date >= range.start && venta.date <= range.end)
                         .map((venta, index, filteredArray) => {
                           const ventaAcumulada = filteredArray
