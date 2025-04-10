@@ -1,9 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { formatUTC } from '@/utils';
 import { CalendarIcon } from 'lucide-react';
 import { es } from 'date-fns/locale';
+import { format } from 'date-fns';
 
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -45,7 +45,7 @@ export default function DatePicker({ label, value, onChange }: DatePickerProps) 
           >
             <CalendarIcon />
             {value ? (
-              formatUTC(value, 'PP', { locale: es })
+              format(value, 'PP', { locale: es })
             ) : (
               <span>Seleccionar fecha</span>
             )}
