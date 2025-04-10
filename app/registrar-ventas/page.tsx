@@ -93,25 +93,22 @@ export default function registerVentas() {
 
       const savedVenta = await setVentaToFirestore(colmado, newVenta);
 
-
       if (ventaExists) {
         setVentas((prevVentas) => prevVentas.map((v) => v.fecha === newVenta.fecha ? { ...newVenta, id: v.id } : v))
-        setNewVenta((prevVenta) => ({ ...prevVenta, venta: 0 }));
-        return
+      } else {
+        setVentas((prevVentas) => [
+          ...prevVentas,
+          {
+            ...savedVenta,
+            date: savedVenta.date instanceof Date ? savedVenta.date : savedVenta.date.toDate(),
+          },
+        ])
       }
       
-      
-      setVentas((prevVentas) => [
-        ...prevVentas,
-        {
-          ...savedVenta,
-          date: savedVenta.date instanceof Date ? savedVenta.date : savedVenta.date.toDate(),
-        },
-      ])
       const savedDate = savedVenta.date.toDate() 
       const nextDate = new Date(savedDate.setDate(savedDate.getDate() + 1))
+      console.log(nextDate)
       setNewVenta({ date: nextDate, venta: 0, fecha: dateAsKey(nextDate)});
-
     } catch (error) {
       console.error("Error saving venta: ", error);
     }
