@@ -3,7 +3,8 @@ import {
   collection, 
   addDoc, 
   updateDoc, 
-  doc, 
+  doc,
+  setDoc, 
   getDoc, 
   getDocs, 
   query, 
@@ -17,16 +18,18 @@ import {
   FieldValue
 } from 'firebase/firestore';
 import type { Venta } from '@/types';
+import { dateAsKey } from '@/utils';
 
 type colmadokey = "o7"| "o9" | "parqueo";
 
 const ventasRef = (colmadokey: colmadokey) => {
-  return collection(fireStore, `ventas/ventas_${colmadokey}/diarias`);
+  return collection(fireStore, `colmados/colmado_${colmadokey}/ventas`);
 }
 
 const prepareVentaForFirestore = (venta: Venta) => {
   return {
     ...venta,
+    fecha: dateAsKey(venta.date),
     date: Timestamp.fromDate(venta.date),
   };
 }
@@ -39,6 +42,19 @@ const prepareVentaFromFirestore = (venta: DocumentData) => {
     fecha: venta.fecha || null,
   };
 }
+
+// TODO: add more field to the colmados collection
+// TODO: Create the proper types for the colmados collection
+// TODO: Make field in the database the same as the types
+export const getColmadosDetails = async (): Promise<{ key: string, name: string; balanceDate: number }[]> => {
+  const colmadosCollection = collection(fireStore, 'colmados');
+  const snapshot = await getDocs(colmadosCollection);
+  return snapshot.docs.map(doc => ({
+    key: doc.data().key,
+    name: doc.data().name,
+    balanceDate: doc.data().balance_day,
+  }));
+};
 
 export const getVentas = async (colmadokey: colmadokey, limitCount: number, startAfterDate?: Date) => {
   const ventasCollection = ventasRef(colmadokey);
@@ -57,6 +73,13 @@ export const getVentas = async (colmadokey: colmadokey, limitCount: number, star
     ventas.push({ ...ventaData, id: doc.id });
   });
 
-  console.log("Ventas: ", ventas);
   return ventas;
 }
+
+// TODO: Add createdAt and created By to this, it's important for logging and control
+export const setVentaToFirestore = async (colmadokey: colmadokey, venta: Venta) => {
+  const ventaData = prepareVentaForFirestore(venta);
+  const docRef = doc(fireStore, `colmados/colmado_${colmadokey}/ventas/${ventaData.fecha}`);
+  await setDoc(docRef, ventaData); 
+  return { ...ventaData, id: ventaData.fecha };
+};
