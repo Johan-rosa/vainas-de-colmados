@@ -49,9 +49,28 @@ export function getDaysDifference(startDate: Date | string | number, endDate: Da
   return absolute ? Math.abs(differenceInDays) : differenceInDays;
 }
 
-// Example usage:
-// const days = getDaysDifference('2023-01-01', '2023-01-15'); // Returns 14
-// const days = getDaysDifference(new Date(2023, 0, 15), new Date(2023, 0, 1)); // Returns -14
-// const days = getDaysDifference(new Date(2023, 0, 15), new Date(2023, 0, 1), true); // Returns 14
+/**
+ * Finds the most recent date with a specific day of the month
+ * @param {Date} referenceDate - The reference date to compare against
+ * @param {number} targetDay - The target day of the month (1-31)
+ * @returns {Date|null} The most recent date with the specified day, or null if not found
+ */
+export const findMostRecentDateWithDay = (referenceDate: Date, targetDay: number): Date => {  
+  // Initialize startDate as null
+  let targetDate = null;
+  
+  const targetDateThisMonth = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), targetDay);
+  
+  if (targetDateThisMonth > referenceDate) {
+    targetDate = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - 1, targetDay);
+  } else {
+    targetDate = targetDateThisMonth;
+  }
+  
+  return targetDate;
+};
 
-export default getDaysDifference;
+
+export const dateAsKey = (date: Date) => {
+  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`
+}
