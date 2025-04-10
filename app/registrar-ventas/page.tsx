@@ -55,7 +55,8 @@ export default function registerVentas() {
 
     try {
       const ventasData = await getVentas(colmado, 120)
-      setVentas(ventasData.map((venta) => ({ ...venta, id: venta.id || "" })))
+      console.log("Vestas from FB:", ventasData)
+      setVentas(ventasData.map((venta) => ({ ...venta, id: venta.id || venta.fecha })))
 
       if (ventasData.length > 0) {
         const mostRecent = ventasData[0]
@@ -71,7 +72,7 @@ export default function registerVentas() {
         setRange({ start: startDate, end: endDate })
 
         const sortedVentas = [...ventasData].sort((a, b) => a.date.getTime() - b.date.getTime());
-        setVentas(sortedVentas.map((venta) => ({ ...venta, id: venta.id || "" })));
+        setVentas(sortedVentas.map((venta) => ({ ...venta, id: venta.id || venta.fecha })));
 
       }
     } catch (error) {
@@ -88,12 +89,18 @@ export default function registerVentas() {
   
     try {
       console.log("Submitting new venta: ", newVenta);
-          // Save the new venta to Firestore
+      const ventaExists = ventas.find(v => v.fecha === newVenta.fecha)
+
       const savedVenta = await setVentaToFirestore(colmado, newVenta);
+
+
+      if (ventaExists) {
+        setVentas((prevVentas) => prevVentas.map((v) => v.fecha === newVenta.fecha ? { ...newVenta, id: v.id } : v))
+        setNewVenta((prevVenta) => ({ ...prevVenta, venta: 0 }));
+        return
+      }
       
-      console.log("Venta saved successfully: ", savedVenta);
-  
-      // Optionally, update the local state to reflect the new venta
+      
       setVentas((prevVentas) => [
         ...prevVentas,
         {
@@ -101,7 +108,6 @@ export default function registerVentas() {
           date: savedVenta.date instanceof Date ? savedVenta.date : savedVenta.date.toDate(),
         },
       ])
-
       const savedDate = savedVenta.date.toDate() 
       const nextDate = new Date(savedDate.setDate(savedDate.getDate() + 1))
       setNewVenta({ date: nextDate, venta: 0, fecha: dateAsKey(nextDate)});
