@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import { Store, CircleDollarSign, CirclePercent,} from "lucide-react"
 import logO from "@/public/logO.png"
 
@@ -18,17 +19,17 @@ import {
 const items = [
   {
     title: "General",
-    url: "#",
+    url: "/",
     icon: Store,
   },
   {
     title: "Ventas",
-    url: "#",
+    url: "/ventas",
     icon: CircleDollarSign,
   },
   {
     title: "Balances",
-    url: "#",
+    url: "/balances",
     icon: CirclePercent,
   },
 ]
@@ -49,10 +50,10 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a className="text-md" href={item.url}>
+                    <Link className="text-md" href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
