@@ -73,7 +73,8 @@ export const getVentas = async (colmadokey: colmadokey, limitCount: number, star
     ventas.push({ ...ventaData, id: doc.id });
   });
 
-  return ventas;
+  return ventas
+  //return ventas.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
 // TODO: Add createdAt and created By to this, it's important for logging and control

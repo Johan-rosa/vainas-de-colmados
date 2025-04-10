@@ -16,7 +16,7 @@ import SelectColmado from "@/components/select-colmado"
 import { getVentas, setVentaToFirestore, getColmadosDetails } from "@/services/ventas-service"
 import { findMostRecentDateWithDay, dateAsKey } from "@/utils"
 
-export default function Home() {
+export default function registerVentas() {
   const [colmados, setColmados] = useState<{ key: string; name: string; balanceDate: number }[]>([])
   const [colmado, setColmado] = useState<ColmadoKey>("o7")
   const [balanceDay, setBalanceDay] = useState(3)
@@ -61,13 +61,18 @@ export default function Home() {
         const mostRecent = ventasData[0]
         const nextDate = new Date(mostRecent.date)
         nextDate.setDate(nextDate.getDate() + 1)
+        
+        setNewVenta(pv => ({ ...pv, date: nextDate }))
+        
 
         const startDate = findMostRecentDateWithDay(mostRecent.date, newBalanceDay)
         // TODO: fix this logic to never be a negative date
         const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, startDate.getDate() - 1)
         setRange({ start: startDate, end: endDate })
 
-        setNewVenta((pv) => ({ ...pv, date: nextDate, fecha: dateAsKey(nextDate) }))
+        const sortedVentas = [...ventasData].sort((a, b) => a.date.getTime() - b.date.getTime());
+        setVentas(sortedVentas.map((venta) => ({ ...venta, id: venta.id || "" })));
+
       }
     } catch (error) {
       console.error("Error loading ventas: ", error)
@@ -89,7 +94,13 @@ export default function Home() {
       console.log("Venta saved successfully: ", savedVenta);
   
       // Optionally, update the local state to reflect the new venta
-      setVentas((prevVentas) => [...prevVentas, {...savedVenta, date: savedVenta.date.toDate()}]);
+      setVentas((prevVentas) => [
+        ...prevVentas,
+        {
+          ...savedVenta,
+          date: savedVenta.date instanceof Date ? savedVenta.date : savedVenta.date.toDate(),
+        },
+      ])
 
       const savedDate = savedVenta.date.toDate() 
       const nextDate = new Date(savedDate.setDate(savedDate.getDate() + 1))
