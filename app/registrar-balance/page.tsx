@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react'
 import { PageHeader } from '@/components/page-header'
 import SelectColmado from "@/components/select-colmado"
 import { getColmadosDetails } from "@/services/ventas-service"
+import { Button } from "@/components/ui/button"
+import {ArrowLeft } from "lucide-react"
 
 import { ColmadoKey } from '@/types'
 
@@ -24,15 +26,20 @@ export default function RegisterBalance() {
   })
   
   return (
-    <PageHeader>
-    <div className="flex w-full items-center justify-between">
-      <h2 className="text-xl">Registrar ventas</h2>
-      <div className="hidden md:block">
-        <SelectColmado selected={colmado} setSelected={(value: ColmadoKey) => setColmado(value)} />
+    <>
+      <PageHeader>
+      <div className="flex w-full items-center justify-between">
+        <h2 className="text-xl">Registrar balances</h2>
+        <div className="hidden md:block">
+          <SelectColmado selected={colmado} setSelected={(value: ColmadoKey) => setColmado(value)} />
+        </div>
       </div>
-    </div>
-  </PageHeader>
+      </PageHeader>
 
-  
+      <Button variant="ghost" className='w-full flex justify-start'>
+        <ArrowLeft />
+        Registrar balance
+      </Button>
+    </> 
   )
 }
