@@ -13,6 +13,8 @@ import { ColmadoKey } from '@/types'
 import { getBalances } from '@/services/balances-service'
 import type { Balance } from '@/types'
 
+import RegistrarBalanceForm from '@/components/register-balance-form'
+
 export default function RegisterBalance() {
   const [colmados, setColmados] = useState<{ key: string; name: string; balanceDate: number }[]>([])
   const [colmado, setColmado] = useState<ColmadoKey>("o7")
@@ -65,6 +67,8 @@ export default function RegisterBalance() {
           Lista de balances
         </Button>
       </Link>
+      <RegistrarBalanceForm>
+      </RegistrarBalanceForm>
     </> 
   )
 }
