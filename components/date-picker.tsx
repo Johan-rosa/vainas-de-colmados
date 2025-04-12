@@ -18,10 +18,11 @@ import {
 type DatePickerProps = {
   label?: string;
   value?: Date; // External value
+  dateFormat?: string
   onChange?: (date: Date | undefined) => void; // Callback for external state sync
 };
 
-export default function DatePicker({ label, value, onChange }: DatePickerProps) {
+export default function DatePicker({ label, value, onChange, dateFormat }: DatePickerProps) {
   const [isOpen, setIsOpen] = React.useState(false); // Track popover state
 
   const handleDateChange = (selectedDate: Date | undefined) => {
@@ -45,7 +46,7 @@ export default function DatePicker({ label, value, onChange }: DatePickerProps) 
           >
             <CalendarIcon />
             {value ? (
-              format(value, 'PP', { locale: es })
+              format(value, dateFormat || "PP", { locale: es })
             ) : (
               <span>Seleccionar fecha</span>
             )}
