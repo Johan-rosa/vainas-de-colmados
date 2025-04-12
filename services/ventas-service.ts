@@ -17,12 +17,12 @@ import {
   Timestamp,
   FieldValue
 } from 'firebase/firestore';
-import type { Venta } from '@/types';
+
+import type { Venta, ColmadoKey } from '@/types';
 import { dateAsKey } from '@/utils';
 
-type colmadokey = "o7"| "o9" | "parqueo";
 
-const ventasRef = (colmadokey: colmadokey) => {
+const ventasRef = (colmadokey: ColmadoKey) => {
   return collection(fireStore, `colmados/colmado_${colmadokey}/ventas`);
 }
 
@@ -56,7 +56,7 @@ export const getColmadosDetails = async (): Promise<{ key: string, name: string;
   }));
 };
 
-export const getVentas = async (colmadokey: colmadokey, limitCount: number, startAfterDate?: Date) => {
+export const getVentas = async (colmadokey: ColmadoKey, limitCount: number, startAfterDate?: Date) => {
   const ventasCollection = ventasRef(colmadokey);
   const q = query(
     ventasCollection,
@@ -78,7 +78,7 @@ export const getVentas = async (colmadokey: colmadokey, limitCount: number, star
 }
 
 // TODO: Add createdAt and created By to this, it's important for logging and control
-export const setVentaToFirestore = async (colmadokey: colmadokey, venta: Venta) => {
+export const setVentaToFirestore = async (colmadokey: ColmadoKey, venta: Venta) => {
   const ventaData = prepareVentaForFirestore(venta);
   const docRef = doc(fireStore, `colmados/colmado_${colmadokey}/ventas/${ventaData.fecha}`);
   await setDoc(docRef, ventaData); 
