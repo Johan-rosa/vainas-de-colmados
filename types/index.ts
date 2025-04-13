@@ -1,23 +1,27 @@
 import { Timestamp } from "firebase/firestore";
 
-export type ColmadoKey = "o7" | "o9" | "parqueo";
+export type Colmado = {
+  id?: string,
+  name: string,
+  balanceDay: number,
+  owners?: string[],
+}
 export interface Venta {
   id?: string;
-  venta: number;
-  fecha: string;
   date: Date
+  sales: number;
 }
 
 export interface Balance {
+  id?: string
   date: Date
-  fecha: string
-  capital_de_trabajo: number
-  pasivos: number
-  total_activos: number
-  beneficio_neto: number
-  gastos: number
-  beneficio_bruto: number
-  ventas: number
-  margen_bruto: number
-  margen_neto: number
+  workingCapital: number
+  liabilities: number
+  totalAssets: number
+  netProfit: number
+  expenses: number
+  grossProfit: number
+  sales: number
+  grossMargin: number
+  netMargin: number
 }

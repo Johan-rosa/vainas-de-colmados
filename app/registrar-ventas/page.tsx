@@ -11,22 +11,22 @@ import DatePicker from "@/components/date-picker"
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-import type { ColmadoKey } from "@/types"
+import type { Venta, Colmado } from "@/types"
 import SelectColmado from "@/components/select-colmado"
 import { getVentas, setVentaToFirestore, getColmadosDetails } from "@/services/ventas-service"
 import { findMostRecentDateWithDay, dateAsKey } from "@/utils"
 
 export default function registerVentas() {
-  const [colmados, setColmados] = useState<{ key: string; name: string; balanceDate: number }[]>([])
-  const [colmado, setColmado] = useState<ColmadoKey>("o7")
+  const [colmados, setColmados] = useState<Colmado[]>([])
+  const [colmado, setColmado] = useState("colmado_o7")
   const [balanceDay, setBalanceDay] = useState(3)
-  const [ventas, setVentas] = useState<{ id: string; [key: string]: any }[]>([])
+  const [ventas, setVentas] = useState<Venta[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [range, setRange] = useState({start: new Date(), end: new Date()})
   const [newVenta, setNewVenta] = useState({
+    id: dateAsKey(new Date()),
     date: new Date(),
-    fecha: dateAsKey(new Date()),
-    venta: 0,
+    sales: 0,
   })
 
   useEffect(() => {
@@ -50,13 +50,12 @@ export default function registerVentas() {
 
   const loadVentas = async () => {
     setIsLoading(true)
-    const newBalanceDay = colmados.find((c) => c.key === colmado)?.balanceDate || 3
+    const newBalanceDay = colmados.find((c) => c.id === colmado)?.balanceDay || 3
     setBalanceDay(newBalanceDay)
 
     try {
       const ventasData = await getVentas(colmado, 120)
-      console.log("Vestas from FB:", ventasData)
-      setVentas(ventasData.map((venta) => ({ ...venta, id: venta.id || venta.fecha })))
+      setVentas(ventasData.map((venta) => ({ ...venta, id: venta.id })))
 
       if (ventasData.length > 0) {
         const mostRecent = ventasData[0]
@@ -72,7 +71,7 @@ export default function registerVentas() {
         setRange({ start: startDate, end: endDate })
 
         const sortedVentas = [...ventasData].sort((a, b) => a.date.getTime() - b.date.getTime());
-        setVentas(sortedVentas.map((venta) => ({ ...venta, id: venta.id || venta.fecha })));
+        setVentas(sortedVentas.map((venta) => ({ ...venta, id: venta.id })));
 
       }
     } catch (error) {
@@ -85,16 +84,16 @@ export default function registerVentas() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!(newVenta.date && newVenta.venta > 0)) return
+    if (!(newVenta.date && newVenta.sales > 0)) return
   
     try {
       console.log("Submitting new venta: ", newVenta);
-      const ventaExists = ventas.find(v => v.fecha === newVenta.fecha)
+      const ventaExists = ventas.find(v => v.id === newVenta.id)
 
       const savedVenta = await setVentaToFirestore(colmado, newVenta);
 
       if (ventaExists) {
-        setVentas((prevVentas) => prevVentas.map((v) => v.fecha === newVenta.fecha ? { ...newVenta, id: v.id } : v))
+        setVentas((prevVentas) => prevVentas.map((v) => v.id === newVenta.id ? { ...newVenta, id: v.id } : v))
       } else {
         setVentas((prevVentas) => [
           ...prevVentas,
@@ -108,7 +107,7 @@ export default function registerVentas() {
       const savedDate = savedVenta.date.toDate() 
       const nextDate = new Date(savedDate.setDate(savedDate.getDate() + 1))
       console.log(nextDate)
-      setNewVenta({ date: nextDate, venta: 0, fecha: dateAsKey(nextDate)});
+      setNewVenta({ date: nextDate, sales: 0, id: dateAsKey(nextDate)});
     } catch (error) {
       console.error("Error saving venta: ", error);
     }
@@ -130,13 +129,13 @@ export default function registerVentas() {
         <div className="flex w-full items-center justify-between">
           <h2 className="text-xl">Registrar ventas</h2>
           <div className="hidden md:block">
-            <SelectColmado selected={colmado} setSelected={(value: ColmadoKey) => setColmado(value)} />
+            <SelectColmado selected={colmado} setSelected={(value: string) => setColmado(value)} />
           </div>
         </div>
       </PageHeader>
       <section className="p-3">
         <div className="block w-full mb-2 md:hidden">
-          <SelectColmado selected={colmado} setSelected={(value: ColmadoKey) => setColmado(value)} />
+          <SelectColmado selected={colmado} setSelected={(value: string) => setColmado(value)} />
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-[1fr_2fr]">
@@ -155,8 +154,8 @@ export default function registerVentas() {
                 <CustomNumberInput 
                   id="venta"
                   label = "Monto"
-                  value={newVenta.venta}
-                  onChange={(value) => setNewVenta((pv) => ({ ...pv, venta: Number(value)}))}
+                  value={newVenta.sales}
+                  onChange={(value) => setNewVenta((pv) => ({ ...pv, sales: Number(value)}))}
                 />
                 <Button className="w-full">Agregar</Button>
               </form>
@@ -200,13 +199,13 @@ export default function registerVentas() {
                         .map((venta, index, filteredArray) => {
                           const ventaAcumulada = filteredArray
                           .slice(0, index + 1)
-                          .reduce((sum, item) => sum + (item.venta || 0), 0);
+                          .reduce((sum, item) => sum + (item.sales || 0), 0);
                           
                           return (
                             <TableRow key={venta.id}>
                                 <TableCell>{index + 1}</TableCell>
                                 <TableCell>{format(venta.date, "PP", { locale: es })}</TableCell>
-                                <TableCell className="text-right">{venta.venta?.toLocaleString()}</TableCell>
+                                <TableCell className="text-right">{venta.sales?.toLocaleString()}</TableCell>
                                 <TableCell className="text-right">{ventaAcumulada.toLocaleString()}</TableCell>
                               </TableRow>
                             );
