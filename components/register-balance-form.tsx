@@ -16,6 +16,7 @@ import CustomNumberInput from "@/components/custon-number-input"
 import { calcNetMargin, calcNetProfit, calcGrossProfit, calcGrossMargin } from "@/utils/balance-utils"
 import { setBalanceToFirestore, prepareBalanceForFirestore } from "@/services/balances-service"
 import { dateAsKey } from "@/utils"
+import { toast } from "sonner"
 
 const numberInputSchema = (name: string) => {
   return (
@@ -76,8 +77,10 @@ export default function RegisterBalanceForm({ appendBalance, colmadoId }: Regist
     try {
       const savedBalance = await setBalanceToFirestore(colmadoId, newBalance)
       appendBalance(newBalance)
+      toast.success("Balance guardado correctamente", {description: `Balance guardado con el Id ${savedBalance.id}`})
     } catch (e) {
       if (e instanceof Error) {
+        toast.error("Error al guardar el balance", {description: "Intente más tarde y si se mantiene el proplema contacte al proveedor"})
         console.error(e.message);
       } else {
         console.error("An unknown error occurred");
