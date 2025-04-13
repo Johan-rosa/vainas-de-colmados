@@ -29,7 +29,6 @@ const ventasRef = (colmadokey: ColmadoKey) => {
 const prepareVentaForFirestore = (venta: Venta) => {
   return {
     ...venta,
-    fecha: dateAsKey(venta.date),
     date: Timestamp.fromDate(venta.date),
   };
 }
@@ -38,8 +37,7 @@ const prepareVentaFromFirestore = (venta: DocumentData) => {
   return {
     ...venta,
     date: venta.date.toDate(),
-    venta: venta.venta || null,
-    fecha: venta.fecha || null,
+    sales: venta.sale || null,
   };
 }
 
@@ -80,7 +78,8 @@ export const getVentas = async (colmadokey: ColmadoKey, limitCount: number, star
 // TODO: Add createdAt and created By to this, it's important for logging and control
 export const setVentaToFirestore = async (colmadokey: ColmadoKey, venta: Venta) => {
   const ventaData = prepareVentaForFirestore(venta);
-  const docRef = doc(fireStore, `colmados/colmado_${colmadokey}/ventas/${ventaData.fecha}`);
+  const docId = dateAsKey(venta.date);
+  const docRef = doc(fireStore, `colmados/colmado_${colmadokey}/ventas/${docId}`);
   await setDoc(docRef, ventaData); 
-  return { ...ventaData, id: ventaData.fecha };
+  return { ...ventaData, id: docId };
 };
