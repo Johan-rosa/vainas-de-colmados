@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input"
 import {Card, CardContent} from "@/components/ui/card"
 import DatePicker from "@/components/date-picker"
 import CustomNumberInput from "@/components/custon-number-input"
+import { calcNetMargin, calcNetProfit, calcGrossProfit, calcGrossMargin } from "@/utils/balance-utils"
 
 const numberInputSchema = (name: string) => {
   return (
@@ -30,6 +31,7 @@ const numberInputSchema = (name: string) => {
       .min(0, `El campo ${name} no puede ser negativo`)
   )
 }
+
 
 const formSchema = z.object({
   date: z.date({
@@ -60,8 +62,14 @@ export default function RegisterBalanceForm() {
 
     function onSubmit(data: formValues) {
       setIsSubmitting(true)
-      console.log("Hello Johan")
-      console.log(data)
+      const balance = {
+        ...data,
+        netProfit: calcNetProfit(data),
+        grossProfit: calcGrossProfit(data),
+        netMargin: calcNetMargin(data),
+        grossMargin: calcGrossMargin(data),
+      }
+
       setIsSubmitting(false)
     }
   

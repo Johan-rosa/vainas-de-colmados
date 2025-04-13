@@ -9,9 +9,11 @@ export const calcGrossProfit = (balance: Balance) => {
 }
 
 export const calcNetMargin = (balance: Balance) => {
+  if (!balance.sales) return 0
   return calcNetProfit(balance) / balance.sales
 }
 
 export const calcGrossMargin = (balance: Balance) => {
+  if (!balance.sales) return 0
   return calcGrossProfit(balance) / balance.sales
 }
