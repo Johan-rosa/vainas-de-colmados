@@ -11,10 +11,10 @@ import {
 } from "firebase/firestore"
 
 import { dateAsKey } from "@/utils"
-import type { ColmadoKey, Balance } from "@/types"
+import type { Balance } from "@/types"
 
-const balanceRef = (colmadoKey: ColmadoKey) => {
-  return collection(fireStore, `colmados/colmado_${colmadoKey}/balances`)
+const balanceRef = (colmadoId: string) => {
+  return collection(fireStore, `colmados/${colmadoId}/balances`)
 }
 
 export const prepareBalanceForFirestore = (balance: Balance) => {
@@ -29,19 +29,15 @@ export const prepareBalanceFromFirestore = (balance: DocumentData): Balance => {
   return {
     ...balance,
     date: balance.date.toDate(),
-    fecha: balance.fecha || "",
-    capital_de_trabajo: balance.capital_de_trabajo || 0,
-    pasivos: balance.pasivos || 0,
-    total_activos: balance.total_activos || 0,
   } as Balance;
 }
 
 export const getBalances = async (
-  colmadoKey: ColmadoKey,
+  colmadoId: string,
   limitCount: number,
   startAfterDate?: Date,
 ) => {
-  const balancesCollection = balanceRef(colmadoKey)
+  const balancesCollection = balanceRef(colmadoId)
   const q = query(
     balancesCollection,
     orderBy("date", "desc"),

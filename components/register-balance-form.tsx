@@ -35,11 +35,11 @@ const formSchema = z.object({
   date: z.date({
     required_error: "La fecha del balance es requerida"
   }),
-  capital: numberInputSchema("Capital"),
-  pasivos: numberInputSchema("Pasivos"),
-  activos: numberInputSchema("Activos"),
-  gastos: numberInputSchema("Gastos"),
-  ventas: numberInputSchema("Ventas"),
+  workingCapital: numberInputSchema("Capital"),
+  liabilities: numberInputSchema("Pasivos"),
+  assets: numberInputSchema("Activos"),
+  expenses: numberInputSchema("Gastos"),
+  sales: numberInputSchema("Ventas"),
 })
 
 type formValues = z.infer<typeof formSchema>
@@ -50,11 +50,11 @@ export default function RegisterBalanceForm() {
       resolver: zodResolver(formSchema),
       defaultValues: {
         date: new Date(),
-        capital: 0,
-        pasivos: 0,
-        activos: 0,
-        gastos: 0,
-        ventas: 0,
+        workingCapital: 0,
+        liabilities: 0,
+        assets: 0,
+        expenses: 0,
+        sales: 0,
       },
     })
 
@@ -85,29 +85,29 @@ export default function RegisterBalanceForm() {
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField control={form.control} name="capital" render={({ field }) => {
+                <FormField control={form.control} name="workingCapital" render={({ field }) => {
                   return (
-                    <CustomNumberInput label="Capital" value={field.value} onChange={field.onChange}/>
+                    <CustomNumberInput id="capital"  label="Capital" value={field.value} onChange={field.onChange}/>
                   )
                 }}/>
-                <FormField control={form.control} name="pasivos" render={({ field }) => {
+                <FormField control={form.control} name="liabilities" render={({ field }) => {
                   return (
-                    <CustomNumberInput label="Pasivos" value={field.value} onChange={field.onChange}/>
+                    <CustomNumberInput id="pasivos" label="Pasivos" value={field.value} onChange={field.onChange}/>
                   )
                 }}/>
-                <FormField control={form.control} name="activos" render={({ field }) => {
+                <FormField control={form.control} name="assets" render={({ field }) => {
                   return (
-                    <CustomNumberInput label="Activos" value={field.value} onChange={field.onChange}/>
+                    <CustomNumberInput id="activos" label="Activos" value={field.value} onChange={field.onChange}/>
                   )
                 }}/>
-                <FormField control={form.control} name="gastos" render={({ field }) => {
+                <FormField control={form.control} name="expenses" render={({ field }) => {
                   return (
-                    <CustomNumberInput label="Gastos" value={field.value} onChange={field.onChange}/>
+                    <CustomNumberInput id="gastos" label="Gastos" value={field.value} onChange={field.onChange}/>
                   )
                 }}/>
-                <FormField control={form.control} name="ventas" render={({ field }) => {
+                <FormField control={form.control} name="sales" render={({ field }) => {
                   return (
-                    <CustomNumberInput label="Pasivos" value={field.value} onChange={field.onChange}/>
+                    <CustomNumberInput id="ventas" label="Ventas" value={field.value} onChange={field.onChange}/>
                   )
                 }}/>
               </div>

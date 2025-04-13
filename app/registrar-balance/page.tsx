@@ -9,21 +9,21 @@ import { getColmadosDetails } from "@/services/ventas-service"
 import { Button } from "@/components/ui/button"
 import {ArrowLeft } from "lucide-react"
 
-import { ColmadoKey } from '@/types'
 import { getBalances } from '@/services/balances-service'
-import type { Balance } from '@/types'
+import type { Balance, Colmado } from '@/types'
 
 import RegistrarBalanceForm from '@/components/register-balance-form'
 
 export default function RegisterBalance() {
-  const [colmados, setColmados] = useState<{ key: string; name: string; balanceDate: number }[]>([])
-  const [colmado, setColmado] = useState<ColmadoKey>("o7")
+  const [colmados, setColmados] = useState<Colmado[]>([])
+  const [colmado, setColmado] = useState("colmado_o7")
   const [balances, setBalances] = useState<Balance[]>()
 
   useEffect(() => {
     const loadBalances = async () => {
       try {
         const balances = await getBalances(colmado, 36)
+        console.log(balances)
         setBalances(balances)
       } catch (e) {
         if (e instanceof Error) {
@@ -56,7 +56,7 @@ export default function RegisterBalance() {
         <div className="hidden md:block">
           <SelectColmado 
             selected={colmado} 
-            setSelected={(value: ColmadoKey) => setColmado(value)}
+            setSelected={(value: string) => setColmado(value)}
           />
         </div>
       </div>

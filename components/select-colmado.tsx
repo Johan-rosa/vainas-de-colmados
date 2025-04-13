@@ -1,10 +1,9 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ColmadoKey } from "@/types";
 
 
 type SelectColmadoProps = {
-  selected: ColmadoKey;
-  setSelected: (value: ColmadoKey) => void;
+  selected: string;
+  setSelected: (value: string) => void;
 }
 
 export default function SelectColmado({selected, setSelected}: SelectColmadoProps) {
@@ -16,9 +15,9 @@ export default function SelectColmado({selected, setSelected}: SelectColmadoProp
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Colmados</SelectLabel>
-          <SelectItem value="o7">Colmado O7</SelectItem>
-          <SelectItem value="o9">Colmado O9</SelectItem>
-          <SelectItem value="parqueo">ParqueO 10</SelectItem>
+          <SelectItem value="colmado_o7">Colmado O7</SelectItem>
+          <SelectItem value="colmado_o9">Colmado O9</SelectItem>
+          <SelectItem value="colmado_parqueo">ParqueO 10</SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>
