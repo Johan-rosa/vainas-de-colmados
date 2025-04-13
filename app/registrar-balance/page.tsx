@@ -19,6 +19,16 @@ export default function RegisterBalance() {
   const [colmado, setColmado] = useState("colmado_o7")
   const [balances, setBalances] = useState<Balance[]>()
 
+  const appendBalance = (balance: Balance) => {
+    const balanceExist = balances?.find(b => b.id === balance.id)
+    if (balanceExist) {
+      // Overwrite the previous balance
+      setBalances(prv => prv?.map(b => b.id === balance.id ? balance : b))
+    } else {
+      setBalances((prev) => (prev ? [...prev, balance] : [balance]))
+    }
+  }
+
   useEffect(() => {
     const loadBalances = async () => {
       try {
@@ -67,8 +77,7 @@ export default function RegisterBalance() {
           Lista de balances
         </Button>
       </Link>
-      <RegistrarBalanceForm>
-      </RegistrarBalanceForm>
+      <RegistrarBalanceForm appendBalance={appendBalance} colmadoId={colmado} />
     </> 
   )
 }

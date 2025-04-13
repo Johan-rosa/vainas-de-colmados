@@ -7,7 +7,9 @@ import {
   limit,
   DocumentData,
   Timestamp,
-  startAfter
+  startAfter,
+  doc,
+  setDoc
 } from "firebase/firestore"
 
 import { dateAsKey } from "@/utils"
@@ -20,7 +22,6 @@ const balanceRef = (colmadoId: string) => {
 export const prepareBalanceForFirestore = (balance: Balance) => {
   return {
     ...balance,
-    fecha: dateAsKey(balance.date),
     date: Timestamp.fromDate(balance.date)
   }
 }
@@ -54,4 +55,12 @@ export const getBalances = async (
   });
 
   return balances
+}
+
+export const setBalanceToFirestore = async (colmadoId: string, balance: Balance) => {
+  const balanceData = prepareBalanceForFirestore(balance)
+  const docId = dateAsKey(balance.date)
+  const docRef = doc(fireStore, `colmados/${colmadoId}/balances/${docId}`)
+  await setDoc(docRef, balanceData)
+  return {...balanceData, id: docId}
 }
