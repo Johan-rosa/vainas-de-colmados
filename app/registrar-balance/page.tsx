@@ -77,7 +77,9 @@ export default function RegisterBalance() {
           Lista de balances
         </Button>
       </Link>
-      <RegistrarBalanceForm appendBalance={appendBalance} colmadoId={colmado} />
+      <div className="max-w-2xl mx-auto p-3">
+        <RegistrarBalanceForm appendBalance={appendBalance} colmadoId={colmado} />
+      </div>
     </> 
   )
 }
