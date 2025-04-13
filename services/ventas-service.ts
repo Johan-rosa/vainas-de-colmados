@@ -17,19 +17,18 @@ import {
   Timestamp,
   FieldValue
 } from 'firebase/firestore';
+
 import type { Venta } from '@/types';
 import { dateAsKey } from '@/utils';
 
-type colmadokey = "o7"| "o9" | "parqueo";
 
-const ventasRef = (colmadokey: colmadokey) => {
-  return collection(fireStore, `colmados/colmado_${colmadokey}/ventas`);
+const ventasRef = (colmadoId: string) => {
+  return collection(fireStore, `colmados/${colmadoId}/ventas`);
 }
 
 const prepareVentaForFirestore = (venta: Venta) => {
   return {
     ...venta,
-    fecha: dateAsKey(venta.date),
     date: Timestamp.fromDate(venta.date),
   };
 }
@@ -38,26 +37,25 @@ const prepareVentaFromFirestore = (venta: DocumentData) => {
   return {
     ...venta,
     date: venta.date.toDate(),
-    venta: venta.venta || null,
-    fecha: venta.fecha || null,
+    sales: venta.sales || 0,
   };
 }
 
 // TODO: add more field to the colmados collection
 // TODO: Create the proper types for the colmados collection
 // TODO: Make field in the database the same as the types
-export const getColmadosDetails = async (): Promise<{ key: string, name: string; balanceDate: number }[]> => {
+export const getColmadosDetails = async (): Promise<{ id: string, name: string; balanceDay: number }[]> => {
   const colmadosCollection = collection(fireStore, 'colmados');
   const snapshot = await getDocs(colmadosCollection);
   return snapshot.docs.map(doc => ({
-    key: doc.data().key,
+    id: doc.id,
     name: doc.data().name,
-    balanceDate: doc.data().balance_day,
+    balanceDay: doc.data().balanceDay,
   }));
 };
 
-export const getVentas = async (colmadokey: colmadokey, limitCount: number, startAfterDate?: Date) => {
-  const ventasCollection = ventasRef(colmadokey);
+export const getVentas = async (colmadoId: string, limitCount: number, startAfterDate?: Date) => {
+  const ventasCollection = ventasRef(colmadoId);
   const q = query(
     ventasCollection,
     orderBy("date", "desc"),
@@ -70,17 +68,17 @@ export const getVentas = async (colmadokey: colmadokey, limitCount: number, star
 
   querySnapshot.forEach((doc) => {
     const ventaData = prepareVentaFromFirestore(doc.data());
-    ventas.push({ ...ventaData, id: doc.id });
+    ventas.push({ ...ventaData, id: doc.id, sales: ventaData.sales });
   });
 
   return ventas
-  //return ventas.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
 // TODO: Add createdAt and created By to this, it's important for logging and control
-export const setVentaToFirestore = async (colmadokey: colmadokey, venta: Venta) => {
+export const setVentaToFirestore = async (colmadoId: string, venta: Venta) => {
   const ventaData = prepareVentaForFirestore(venta);
-  const docRef = doc(fireStore, `colmados/colmado_${colmadokey}/ventas/${ventaData.fecha}`);
+  const docId = dateAsKey(venta.date);
+  const docRef = doc(fireStore, `colmados/${colmadoId}/ventas/${docId}`);
   await setDoc(docRef, ventaData); 
-  return { ...ventaData, id: ventaData.fecha };
+  return { ...ventaData, id: docId };
 };
