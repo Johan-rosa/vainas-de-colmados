@@ -91,7 +91,7 @@ export default function RegisterBalanceForm({ appendBalance, colmadoId }: Regist
   }
 
   return (
-    <Card>
+    <Card className="mx-96">
       <CardContent className="pt-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
