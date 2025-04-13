@@ -37,7 +37,7 @@ const formSchema = z.object({
   }),
   workingCapital: numberInputSchema("Capital"),
   liabilities: numberInputSchema("Pasivos"),
-  assets: numberInputSchema("Activos"),
+  totalAssets: numberInputSchema("Activos"),
   expenses: numberInputSchema("Gastos"),
   sales: numberInputSchema("Ventas"),
 })
@@ -52,7 +52,7 @@ export default function RegisterBalanceForm() {
         date: new Date(),
         workingCapital: 0,
         liabilities: 0,
-        assets: 0,
+        totalAssets: 0,
         expenses: 0,
         sales: 0,
       },
@@ -95,7 +95,7 @@ export default function RegisterBalanceForm() {
                     <CustomNumberInput id="pasivos" label="Pasivos" value={field.value} onChange={field.onChange}/>
                   )
                 }}/>
-                <FormField control={form.control} name="assets" render={({ field }) => {
+                <FormField control={form.control} name="totalAssets" render={({ field }) => {
                   return (
                     <CustomNumberInput id="activos" label="Activos" value={field.value} onChange={field.onChange}/>
                   )

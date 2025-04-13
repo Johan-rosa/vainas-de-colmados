@@ -18,10 +18,10 @@ export interface Balance {
   workingCapital: number
   liabilities: number
   totalAssets: number
-  netProfit: number
   expenses: number
-  grossProfit: number
   sales: number
-  grossMargin: number
-  netMargin: number
+  netProfit?: number
+  grossProfit?: number
+  grossMargin?: number
+  netMargin?: number
 }
