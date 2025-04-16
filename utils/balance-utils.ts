@@ -1,4 +1,11 @@
-import type { Balance } from "@/types"
+type Balance = {
+  date: Date,
+  workingCapital: number,
+  liabilities: number,
+  totalAssets: number,
+  expenses: number,
+  sales: number,
+}
 
 export const calcNetProfit = (balance: Balance ) => {
   return balance.totalAssets - balance.workingCapital - balance.liabilities 
