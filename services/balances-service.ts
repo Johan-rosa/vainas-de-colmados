@@ -51,7 +51,7 @@ export const getBalances = async (
 
   querySnapshot.forEach((doc) => {
     const balanceData = prepareBalanceFromFirestore(doc.data());
-    balances.push(balanceData);
+    balances.push({...balanceData, id: doc.id});
   });
 
   return balances

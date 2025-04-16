@@ -13,15 +13,15 @@ export interface Venta {
 }
 
 export interface Balance {
-  id?: string
+  id: string
   date: Date
   workingCapital: number
   liabilities: number
   totalAssets: number
   expenses: number
   sales: number
-  netProfit?: number
-  grossProfit?: number
-  grossMargin?: number
-  netMargin?: number
+  netProfit: number
+  grossProfit: number
+  grossMargin: number
+  netMargin: number
 }
